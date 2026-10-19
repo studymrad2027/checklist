@@ -1,8 +1,13 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>MRAD Study Checklist</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
+html{color-scheme:light dark}body{margin:0}
 /* Layout: single narrow column; sticky progress header; one card per study day with a ticked task list. */
 :root{
   --bg:#f3f6f8; --surface:#ffffff; --fg:#14232e; --muted:#5b6e7b; --line:#d9e2e8;
@@ -51,11 +56,23 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 label{display:flex;gap:10px;align-items:flex-start;padding:7px 0;cursor:pointer}
 label input{margin-top:3px;width:18px;height:18px;flex:none;accent-color:var(--accent)}
 label span{min-width:0}
-label input:checked+span{color:var(--muted);text-decoration:line-through}
 .note{background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:8px 10px;font-size:.85rem;margin-top:8px}
 .foot{display:flex;gap:8px;flex-wrap:wrap}
 .foot button{font:inherit;font-size:.85rem;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}
 .foot button:focus-visible{outline:2px solid var(--accent)}
+
+.item{display:flex;align-items:flex-start;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
+.item:last-of-type{border-bottom:0}
+.ck{all:unset;box-sizing:border-box;cursor:pointer;flex:none;width:22px;height:22px;margin-top:1px;border-radius:50%;border:1.5px solid var(--muted);display:grid;place-items:center}
+.ck:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ck[aria-checked="true"]{background:var(--accent);border-color:var(--accent)}
+.ck[aria-checked="true"]::after{content:"";width:5px;height:10px;border:solid var(--surface);border-width:0 2px 2px 0;transform:translateY(-1px) rotate(45deg)}
+.txt{flex:1;min-width:0;overflow-wrap:anywhere;outline:none;caret-color:var(--accent);cursor:text;min-height:1.5em}
+.txt:empty::before{content:attr(data-ph);color:var(--muted)}
+.item.done .txt{color:var(--muted)}
+.newrow{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:12px;padding:10px 0 2px;color:var(--accent);font-weight:500}
+.newrow .plus{width:22px;text-align:center;font-size:1.3rem;line-height:1}
+.newrow:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.bar i{transition:none}}
 </style>
 
@@ -96,7 +113,8 @@ label input:checked+span{color:var(--muted);text-decoration:line-through}
     </ul>
   </div>
 
-  <div class="foot"><button id="reset" type="button">Clear all ticks</button><button id="reset2" type="button" hidden>Tap again to confirm</button></div>
+
+  <div class="foot"><button id="reset" type="button">Restore original plan</button><button id="reset2" type="button" hidden>Tap again: removes your changes</button></div>
 </div>
 
 <script>
@@ -137,65 +155,148 @@ var D=[
  ["Today",["Light breakfast, arrive early","Optional: skim the error log, then stop","Sit the exam"]]]}
 ];
 
-var KEY="mrad-checklist-v1", state={};
-try{state=JSON.parse(localStorage.getItem(KEY)||"{}")||{}}catch(e){state={}}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+var KEY="mrad-checklist-v2", OLD="mrad-checklist-v1", model=null, openMap={}, uid=Date.now(), focusReq=null, st=null;
+function seed(){
+  var old={}; try{old=JSON.parse(localStorage.getItem(OLD)||"{}")||{}}catch(e){}
+  var m={};
+  D.forEach(function(d){
+    m[d.id]=d.groups.map(function(g,gi){
+      return {name:g[0],items:g[1].map(function(t,ti){var id=d.id+"-"+gi+"-"+ti;return {id:id,t:t,done:!!old[id]}})};
+    });
+  });
+  return m;
+}
+try{model=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){model=null}
+if(!model||typeof model!=="object")model=seed();
+D.forEach(function(d){ if(!model[d.id])model[d.id]=seed()[d.id]; });
+function save(){try{localStorage.setItem(KEY,JSON.stringify(model))}catch(e){}}
+function saveSoon(){clearTimeout(st);st=setTimeout(save,300);}
 
 var todayStr=(function(){var n=new Date();return n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")+"-"+String(n.getDate()).padStart(2,"0")})();
 var list=document.getElementById("list");
-var total=0;
-D.forEach(function(d){
-  var sec=document.createElement("section"); sec.className="day"+(d.date===todayStr?" today":""); sec.id=d.id;
-  var btn=document.createElement("button"); btn.type="button";
-  var open=d.date===todayStr||(todayStr<D[0].date&&d===D[0])||(todayStr>D[D.length-1].date&&d===D[D.length-1]);
-  var body=document.createElement("div"); body.className="body"; body.hidden=!open;
-  btn.setAttribute("aria-expanded",open);
-  var n=0;
-  d.groups.forEach(function(g,gi){
-    var h=document.createElement("div"); h.className="grp"; h.textContent=g[0]; body.appendChild(h);
-    g[1].forEach(function(t,ti){
-      var id=d.id+"-"+gi+"-"+ti, lb=document.createElement("label");
-      var cb=document.createElement("input"); cb.type="checkbox"; cb.id=id; cb.checked=!!state[id];
-      cb.addEventListener("change",function(){ if(cb.checked)state[id]=1; else delete state[id]; save(); refresh(); });
-      var sp=document.createElement("span"); sp.textContent=t;
-      lb.appendChild(cb); lb.appendChild(sp); body.appendChild(lb); n++;
-    });
-  });
-  if(d.note){var nt=document.createElement("div"); nt.className="note"; nt.textContent=d.note; body.appendChild(nt);}
-  d.n=n; total+=n;
-  btn.innerHTML='<span class="date"><small></small></span><span class="title"></span><span class="badge"></span>';
-  btn.querySelector(".date").insertAdjacentText("afterbegin",d.label);
-  btn.querySelector("small").textContent=d.dow;
-  var tt=btn.querySelector(".title"); tt.textContent=d.title;
-  if(d.date===todayStr){var tg=document.createElement("span"); tg.className="tag"; tg.textContent="today"; tt.appendChild(tg);}
-  var sm=document.createElement("small"); sm.textContent=d.sub; tt.appendChild(sm);
-  btn.addEventListener("click",function(){ var o=body.hidden; body.hidden=!o; btn.setAttribute("aria-expanded",o); });
-  sec.appendChild(btn); sec.appendChild(body); list.appendChild(sec);
-});
 
-function refresh(){
-  var done=0;
+function counts(d){var n=0,c=0;model[d.id].forEach(function(g){g.items.forEach(function(i){n++;if(i.done)c++})});return [c,n];}
+function refreshCounts(){
+  var done=0,total=0;
   D.forEach(function(d){
-    var c=0; for(var k in state){ if(k.indexOf(d.id+"-")===0)c++; }
-    done+=c;
-    var b=document.querySelector("#"+d.id+" .badge"); b.textContent=c+"/"+d.n; b.className="badge"+(c===d.n?" full":"");
+    var c=counts(d); done+=c[0]; total+=c[1];
+    var b=document.querySelector("#"+d.id+" .badge");
+    if(b){b.textContent=c[0]+"/"+c[1]; b.className="badge"+(c[1]&&c[0]===c[1]?" full":"");}
   });
   var p=total?Math.round(done/total*100):0;
   document.getElementById("ovl").textContent=done+" of "+total+" tasks";
   document.getElementById("ovp").textContent=p+"%";
   document.getElementById("ovb").style.width=p+"%";
 }
+function flat(d){var a=[];model[d.id].forEach(function(g){g.items.forEach(function(i){a.push({g:g,i:i})})});return a;}
+function cleanTxt(el){return el.textContent.replace(/\s+/g," ").trim();}
+
+function removeItem(d,g,it,row){
+  var ii=g.items.indexOf(it); if(ii>-1)g.items.splice(ii,1);
+  if(!g.items.length&&g.name==="Added"){var gi=model[d.id].indexOf(g); if(gi>-1)model[d.id].splice(gi,1);}
+  if(row&&row.parentNode)row.remove();
+  save(); refreshCounts();
+}
+
+function addAfter(d,g,it,text){
+  var ni={id:"u"+(uid++),t:text||"",done:false};
+  var ii=it?g.items.indexOf(it):g.items.length-1;
+  g.items.splice(ii+1,0,ni);
+  focusReq={id:ni.id,end:true}; openMap[d.id]=true; save(); render();
+}
+
+function render(){
+  var scrollY=window.scrollY;
+  list.innerHTML="";
+  D.forEach(function(d){
+    var isToday=d.date===todayStr;
+    if(!(d.id in openMap)){
+      openMap[d.id]=isToday||(todayStr<D[0].date&&d===D[0])||(todayStr>D[D.length-1].date&&d===D[D.length-1]);
+    }
+    var open=openMap[d.id];
+    var sec=document.createElement("section"); sec.className="day"+(isToday?" today":""); sec.id=d.id;
+    var btn=document.createElement("button"); btn.type="button"; btn.setAttribute("aria-expanded",open);
+    btn.innerHTML='<span class="date"><span class="dl"></span><small></small></span><span class="title"><span class="tt"></span><small class="ss"></small></span><span class="badge"></span>';
+    btn.querySelector(".dl").textContent=d.label;
+    btn.querySelector("small").textContent=d.dow;
+    var tt=btn.querySelector(".tt"); tt.textContent=d.title;
+    if(isToday){var tg=document.createElement("span"); tg.className="tag"; tg.textContent="today"; tt.appendChild(tg);}
+    btn.querySelector(".ss").textContent=d.sub;
+    var body=document.createElement("div"); body.className="body"; body.hidden=!open;
+    btn.addEventListener("click",function(){ openMap[d.id]=body.hidden; body.hidden=!body.hidden; btn.setAttribute("aria-expanded",!body.hidden); });
+
+    model[d.id].forEach(function(g){
+      if(!g.items.length)return;
+      var h=document.createElement("div"); h.className="grp"; h.textContent=g.name; body.appendChild(h);
+      g.items.forEach(function(it){
+        var r=document.createElement("div"); r.className="item"+(it.done?" done":"");
+        var ck=document.createElement("button"); ck.type="button"; ck.className="ck"; ck.setAttribute("role","checkbox");
+        ck.setAttribute("aria-checked",it.done); ck.setAttribute("aria-label","Mark done");
+        ck.addEventListener("click",function(){
+          it.done=!it.done; ck.setAttribute("aria-checked",it.done);
+          r.classList.toggle("done",it.done); save(); refreshCounts();
+        });
+        var tx=document.createElement("span"); tx.className="txt"; tx.id="t-"+it.id;
+        tx.setAttribute("contenteditable","plaintext-only");
+        if(tx.contentEditable!=="plaintext-only")tx.setAttribute("contenteditable","true");
+        tx.setAttribute("role","textbox"); tx.setAttribute("aria-label","Task"); tx.setAttribute("data-ph","New task");
+        tx.setAttribute("spellcheck","false");
+        tx.textContent=it.t;
+        tx.addEventListener("input",function(){it.t=cleanTxt(tx);saveSoon();});
+        tx.addEventListener("keydown",function(e){
+          if(e.key==="Enter"){
+            e.preventDefault();
+            var v=cleanTxt(tx);
+            if(!v){ removeItem(d,g,it,r); tx.blur(); return; }
+            it.t=v; addAfter(d,g,it,"");
+          }else if(e.key==="Backspace"&&!cleanTxt(tx)){
+            e.preventDefault();
+            var fl=flat(d), idx=-1; fl.forEach(function(x,k){if(x.i===it)idx=k;});
+            var prev=idx>0?fl[idx-1].i:null;
+            removeItem(d,g,it,r);
+            if(prev){var pe=document.getElementById("t-"+prev.id); if(pe)placeEnd(pe);}
+          }else if(e.key==="Escape"){ tx.blur(); }
+        });
+        tx.addEventListener("paste",function(e){
+          e.preventDefault();
+          var t=((e.clipboardData||window.clipboardData).getData("text")||"").replace(/\s+/g," ");
+          document.execCommand("insertText",false,t);
+        });
+        tx.addEventListener("blur",function(){
+          if(!cleanTxt(tx)&&g.items.indexOf(it)>-1){ removeItem(d,g,it,r); }
+          else{ tx.scrollLeft=0; }
+        });
+        r.appendChild(ck); r.appendChild(tx); body.appendChild(r);
+      });
+    });
+    if(d.note){var nt=document.createElement("div"); nt.className="note"; nt.textContent=d.note; body.appendChild(nt);}
+    var nb=document.createElement("button"); nb.type="button"; nb.className="newrow"; nb.innerHTML='<span class="plus">+</span> New task';
+    nb.addEventListener("click",function(){
+      var gs=model[d.id].filter(function(x){return x.items.length});
+      var g=gs.length?gs[gs.length-1]:null;
+      if(!g){g=model[d.id].filter(function(x){return x.name==="Added"})[0]; if(!g){g={name:"Added",items:[]};model[d.id].push(g);}}
+      addAfter(d,g,null,"");
+    });
+    body.appendChild(nb);
+    sec.appendChild(btn); sec.appendChild(body); list.appendChild(sec);
+  });
+  refreshCounts();
+  window.scrollTo(0,scrollY);
+  if(focusReq){var el=document.getElementById("t-"+focusReq.id); focusReq=null; if(el)placeEnd(el);}
+}
+function placeEnd(el){
+  el.focus();
+  try{var rg=document.createRange(); rg.selectNodeContents(el); rg.collapse(false); var s=window.getSelection(); s.removeAllRanges(); s.addRange(rg);}catch(e){}
+}
+
 var exam=new Date(2026,9,27), now=new Date(); now=new Date(now.getFullYear(),now.getMonth(),now.getDate());
 document.getElementById("days").textContent=Math.max(0,Math.round((exam-now)/864e5));
-refresh();
+render();
 
 var r1=document.getElementById("reset"), r2=document.getElementById("reset2");
 r1.addEventListener("click",function(){r1.hidden=true;r2.hidden=false;});
-r2.addEventListener("click",function(){
-  state={}; save();
-  document.querySelectorAll("#list input").forEach(function(i){i.checked=false});
-  refresh(); r2.hidden=true; r1.hidden=false;
-});
+r2.addEventListener("click",function(){ model=seed(); save(); render(); r2.hidden=true; r1.hidden=false; });
 </script>
 
-</body></html>
+</body>
+</html>
