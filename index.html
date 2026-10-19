@@ -93,7 +93,7 @@ label span{min-width:0}
       <h1>MRAD Study Checklist</h1>
       <p class="sub">SBA exam, Tue 27 Oct 2026. 1,067 RadWise questions to finish, theory to revise. <span id="sync"></span></p>
     </div>
-    <div class="count"><b id="days">–</b><span>days to exam</span></div>
+    <div class="count"><b id="days">–</b><span id="cdl">to exam</span></div>
   </div>
 
   <div class="overall">
@@ -300,8 +300,13 @@ function placeEnd(el){
   try{var rg=document.createRange(); rg.selectNodeContents(el); rg.collapse(false); var s=window.getSelection(); s.removeAllRanges(); s.addRange(rg);}catch(e){}
 }
 
-var exam=new Date(2026,9,27), now=new Date(); now=new Date(now.getFullYear(),now.getMonth(),now.getDate());
-document.getElementById("days").textContent=Math.max(0,Math.round((exam-now)/864e5));
+var EXAM=new Date("2026-10-27T08:00:00+08:00"); /* exam start, Malaysia time: change the 08:00 if yours differs */
+function tick(){
+  var ms=Math.max(0,EXAM-new Date()), d=Math.floor(ms/864e5), h=Math.floor(ms%864e5/36e5), m=Math.floor(ms%36e5/6e4);
+  document.getElementById("days").textContent=d+"d "+h+"h";
+  document.getElementById("cdl").textContent=ms?(m+" min to exam"):"exam time";
+}
+tick(); setInterval(tick,30000);
 render();
 
 
