@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>MRAD Study Checklist</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
-html{color-scheme:light dark}body{margin:0}
+html{color-scheme:light dark;-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:hidden;touch-action:manipulation}body{margin:0;font-size:16px;overflow-x:hidden}.txt,.add input{font-size:16px}
 /* Layout: single narrow column; sticky progress header; one card per study day with a ticked task list. */
 :root{
   --bg:#f3f6f8; --surface:#ffffff; --fg:#14232e; --muted:#5b6e7b; --line:#d9e2e8;
@@ -69,7 +69,7 @@ label span{min-width:0}
 .ck[aria-checked="true"]::after{content:"";width:5px;height:10px;border:solid var(--surface);border-width:0 2px 2px 0;transform:translateY(-1px) rotate(45deg)}
 .txt{flex:1;min-width:0;overflow-wrap:anywhere;outline:none;caret-color:var(--accent);cursor:text;min-height:1.5em}
 .txt:empty::before{content:attr(data-ph);color:var(--muted)}
-.item.done .txt{color:var(--muted)}
+.item.done .txt{color:var(--muted);text-decoration:line-through}
 .newrow{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:12px;padding:10px 0 2px;color:var(--accent);font-weight:500}
 .newrow .plus{width:22px;text-align:center;font-size:1.3rem;line-height:1}
 .newrow:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
