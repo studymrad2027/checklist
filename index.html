@@ -80,7 +80,7 @@ label span{min-width:0}
   <div class="top">
     <div>
       <h1>MRAD Study Checklist</h1>
-      <p class="sub">SBA exam, Tue 27 Oct 2026. 1,067 RadWise questions to finish, theory to revise.</p>
+      <p class="sub">SBA exam, Tue 27 Oct 2026. 1,067 RadWise questions to finish, theory to revise. <span id="sync"></span></p>
     </div>
     <div class="count"><b id="days">–</b><span>days to exam</span></div>
   </div>
@@ -155,7 +155,7 @@ var D=[
  ["Today",["Light breakfast, arrive early","Optional: skim the error log, then stop","Sit the exam"]]]}
 ];
 
-var KEY="mrad-checklist-v2", OLD="mrad-checklist-v1", model=null, openMap={}, uid=Date.now(), focusReq=null, st=null;
+var DK="mrad-checklist-dirty", KEY="mrad-checklist-v2", OLD="mrad-checklist-v1", model=null, openMap={}, uid=Date.now(), focusReq=null, st=null;
 function seed(){
   var old={}; try{old=JSON.parse(localStorage.getItem(OLD)||"{}")||{}}catch(e){}
   var m={};
@@ -169,7 +169,7 @@ function seed(){
 try{model=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){model=null}
 if(!model||typeof model!=="object")model=seed();
 D.forEach(function(d){ if(!model[d.id])model[d.id]=seed()[d.id]; });
-function save(){try{localStorage.setItem(KEY,JSON.stringify(model))}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(model));localStorage.setItem(DK,"1")}catch(e){} pushSoon();}
 function saveSoon(){clearTimeout(st);st=setTimeout(save,300);}
 
 var todayStr=(function(){var n=new Date();return n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")+"-"+String(n.getDate()).padStart(2,"0")})();
@@ -293,6 +293,47 @@ var exam=new Date(2026,9,27), now=new Date(); now=new Date(now.getFullYear(),now
 document.getElementById("days").textContent=Math.max(0,Math.round((exam-now)/864e5));
 render();
 
+
+/* Supabase sync: one shared row (id "main") in the checklist project. */
+var SB_URL="https://vxkckhukeujwteiljbhu.supabase.co", SB_KEY="sb_publishable_Nf86N3pMBWe1LJhFMmPLFg_z9gSMSMb";
+var SB_H={"apikey":SB_KEY,"Content-Type":"application/json"}, pt=null, pushing=false, again=false;
+function setSync(t){var e=document.getElementById("sync"); if(e)e.textContent=t;}
+function isDirty(){try{return localStorage.getItem(DK)==="1"}catch(e){return false}}
+function pushSoon(){setSync("Saving…");clearTimeout(pt);pt=setTimeout(push,600);}
+function push(){
+  if(pushing){again=true;return;}
+  pushing=true;
+  var snap=JSON.stringify(model);
+  fetch(SB_URL+"/rest/v1/checklist?on_conflict=id",{method:"POST",
+    headers:Object.assign({"Prefer":"resolution=merge-duplicates,return=minimal"},SB_H),
+    body:JSON.stringify({id:"main",data:JSON.parse(snap),updated_at:new Date().toISOString()})})
+  .then(function(r){
+    if(!r.ok)throw new Error(r.status);
+    pushing=false;
+    if(again||snap!==JSON.stringify(model)){again=false;push();return;}
+    try{localStorage.removeItem(DK)}catch(e){}
+    setSync("Synced");
+  }).catch(function(){pushing=false;setSync("Offline: saved on this device, will sync later");});
+}
+function editing(){var a=document.activeElement;return a&&a.classList&&a.classList.contains("txt");}
+function pull(){
+  if(isDirty()){push();return;}
+  fetch(SB_URL+"/rest/v1/checklist?id=eq.main&select=data",{headers:SB_H})
+  .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+  .then(function(rows){
+    if(!rows.length){push();return;}
+    var d=rows[0].data;
+    if(d&&typeof d==="object"&&JSON.stringify(d)!==JSON.stringify(model)&&!editing()&&!isDirty()){
+      model=d; D.forEach(function(x){if(!model[x.id])model[x.id]=seed()[x.id];});
+      try{localStorage.setItem(KEY,JSON.stringify(model))}catch(e){}
+      render();
+    }
+    setSync("Synced");
+  }).catch(function(){setSync("Offline: saved on this device");});
+}
+pull();
+document.addEventListener("visibilitychange",function(){if(!document.hidden)pull();});
+setInterval(function(){if(!document.hidden)pull();},20000);
 var r1=document.getElementById("reset"), r2=document.getElementById("reset2");
 r1.addEventListener("click",function(){r1.hidden=true;r2.hidden=false;});
 r2.addEventListener("click",function(){ model=seed(); save(); render(); r2.hidden=true; r1.hidden=false; });
