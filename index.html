@@ -1,0 +1,201 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>MRAD Study Checklist</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: single narrow column; sticky progress header; one card per study day with a ticked task list. */
+:root{
+  --bg:#f3f6f8; --surface:#ffffff; --fg:#14232e; --muted:#5b6e7b; --line:#d9e2e8;
+  --accent:#0b6e7f; --accent-soft:#dcf0f3; --done:#2e7d4f; --warn:#b4560f; --warn-soft:#fbeadb;
+  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e171d; --surface:#15222a; --fg:#e4edf2; --muted:#93a7b4; --line:#26373f;
+  --accent:#4cc3d6; --accent-soft:#12343b; --done:#5fc98a; --warn:#f0a064; --warn-soft:#3a2615; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e171d; --surface:#15222a; --fg:#e4edf2; --muted:#93a7b4; --line:#26373f;
+  --accent:#4cc3d6; --accent-soft:#12343b; --done:#5fc98a; --warn:#f0a064; --warn-soft:#3a2615; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1{font-size:1.6rem;margin:0;font-weight:600;letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0}
+.top{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between}
+.count{font-family:var(--font-mono);text-align:right}
+.count b{font-size:2rem;font-weight:500;color:var(--accent);display:block;line-height:1}
+.count span{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.overall{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:8px;
+  position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+.bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
+.row{display:flex;justify-content:space-between;gap:8px;font-family:var(--font-mono);font-size:.8rem;color:var(--muted)}
+.rhythm,.rules{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px}
+.rhythm h2,.rules h2{font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:0 0 8px;font-weight:600}
+.rhythm ul,.rules ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.day{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.day.today{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.day>button{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:flex;gap:12px;align-items:center;padding:14px;flex-wrap:wrap}
+.day>button:focus-visible,label:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.date{font-family:var(--font-mono);font-weight:500;min-width:4.4rem}
+.date small{display:block;font-size:.7rem;color:var(--muted);font-weight:400;text-transform:uppercase;letter-spacing:.08em}
+.title{flex:1;min-width:10rem;font-weight:600}
+.title small{display:block;font-weight:400;color:var(--muted);font-size:.82rem}
+.badge{font-family:var(--font-mono);font-size:.75rem;padding:2px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
+.badge.full{background:var(--done);color:var(--surface)}
+.tag{font-size:.7rem;padding:1px 7px;border-radius:99px;background:var(--accent-soft);color:var(--accent);margin-left:6px;vertical-align:1px}
+.body{border-top:1px solid var(--line);padding:6px 14px 14px;display:flex;flex-direction:column}
+.body[hidden]{display:none}
+.grp{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:12px 0 2px;font-weight:600}
+label{display:flex;gap:10px;align-items:flex-start;padding:7px 0;cursor:pointer}
+label input{margin-top:3px;width:18px;height:18px;flex:none;accent-color:var(--accent)}
+label span{min-width:0}
+label input:checked+span{color:var(--muted);text-decoration:line-through}
+.note{background:var(--warn-soft);color:var(--warn);border-radius:8px;padding:8px 10px;font-size:.85rem;margin-top:8px}
+.foot{display:flex;gap:8px;flex-wrap:wrap}
+.foot button{font:inherit;font-size:.85rem;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}
+.foot button:focus-visible{outline:2px solid var(--accent)}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>MRAD Study Checklist</h1>
+      <p class="sub">SBA exam, Tue 27 Oct 2026. 1,067 RadWise questions to finish, theory to revise.</p>
+    </div>
+    <div class="count"><b id="days">–</b><span>days to exam</span></div>
+  </div>
+
+  <div class="overall">
+    <div class="row"><span id="ovl">0 of 0 tasks</span><span id="ovp">0%</span></div>
+    <div class="bar"><i id="ovb"></i></div>
+  </div>
+
+  <div class="rhythm">
+    <h2>Daily rhythm (Mon 19 to Sat 24)</h2>
+    <ul>
+      <li>Morning, 3.5 to 4 h: RadWise in sets of 50, review each set straight after.</li>
+      <li>Afternoon, 3 h: theory books, active notes, not passive reading.</li>
+      <li>Evening, 1 to 1.5 h: 30 to 40 questions from your own bank, then the error log.</li>
+      <li>Sleep at least 7 h.</li>
+    </ul>
+  </div>
+
+  <div id="list" class="wrap" style="gap:12px"></div>
+
+  <div class="rules">
+    <h2>Rules</h2>
+    <ul>
+      <li>Keep "Include seen questions" off on RadWise so you only get unseen ones.</li>
+      <li>If you fall more than 40 questions behind, cut own-bank time. Never cut RadWise or sleep.</li>
+      <li>Error log: one line per wrong or guessed question, with the learning point.</li>
+      <li>No new books after Friday. Revise what you already have.</li>
+      <li>Nuclear medicine, breast and obstetrics: skim only, they carry very few exam marks.</li>
+    </ul>
+  </div>
+
+  <div class="foot"><button id="reset" type="button">Clear all ticks</button><button id="reset2" type="button" hidden>Tap again to confirm</button></div>
+</div>
+
+<script>
+var D=[
+{id:"d19",date:"2026-10-19",dow:"Mon",label:"19 Oct",title:"Cardiothoracic start",sub:"Half day",groups:[
+ ["RadWise",["Cardiothoracic and Vascular: 120 questions (sets of 50, review each set)"]],
+ ["Theory",["Lung, ILD and pleura chapters"]],
+ ["Evening",["Error log written"]]]},
+{id:"d20",date:"2026-10-20",dow:"Tue",label:"20 Oct",title:"Finish chest, start MSK",sub:"190 RadWise questions",groups:[
+ ["RadWise",["Finish Cardiothoracic and Vascular: 59 questions (category done)","Musculoskeletal and Trauma: 131 questions"]],
+ ["Theory",["Cardiac, aorta and vascular chapters"]],
+ ["Evening",["Own bank: 30 to 40 questions (chest or MSK)","Error log written"]]]},
+{id:"d21",date:"2026-10-21",dow:"Wed",label:"21 Oct",title:"Finish MSK, start Neuro",sub:"190 RadWise questions",groups:[
+ ["RadWise",["Finish Musculoskeletal and Trauma: 48 questions (category done)","Neuro and Head & Neck: 142 questions"]],
+ ["Theory",["MSK tumours, arthritis and trauma chapters"]],
+ ["Evening",["Own bank: 30 to 40 questions (MSK or neuro)","Error log written"]]]},
+{id:"d22",date:"2026-10-22",dow:"Thu",label:"22 Oct",title:"Finish Neuro, start GI",sub:"190 RadWise questions",groups:[
+ ["RadWise",["Finish Neuro and Head & Neck: 35 questions (category done)","Gastro-Intestinal: 155 questions"]],
+ ["Theory",["Brain and spine chapters","Head and neck chapter"]],
+ ["Evening",["Own bank: 30 to 40 questions (neuro or head & neck)","Error log written"]]]},
+{id:"d23",date:"2026-10-23",dow:"Fri",label:"23 Oct",title:"Finish GI, Paediatrics",sub:"189 RadWise questions",groups:[
+ ["RadWise",["Finish Gastro-Intestinal: 16 questions (category done)","Paediatrics: 173 questions (category done)"]],
+ ["Theory",["Liver, biliary, pancreas and bowel chapters","Paediatric notes across all systems"]],
+ ["Evening",["Own bank: 30 to 40 questions (GI)","Error log written","Last day to open a new book"]]]},
+{id:"d24",date:"2026-10-24",dow:"Sat",label:"24 Oct",title:"GU, Obs and Breast",sub:"188 RadWise questions",groups:[
+ ["RadWise",["GU, Adrenal, Obs & Gynae and Breast: 188 questions (skim nuclear medicine, breast and obs)","All six RadWise categories finished"]],
+ ["Theory",["GU and male pelvis chapters","Light pass on breast and women's imaging"]],
+ ["Evening",["Own bank: 30 to 40 questions (GU or weakest topic)","Error log written"]]],
+ note:"Cannot finish everything today? Sunday is the buffer."},
+{id:"d25",date:"2026-10-25",dow:"Sun",label:"25 Oct",title:"Catch-up and mock papers",sub:"Buffer day",groups:[
+ ["Morning",["Finish any RadWise questions still unseen"]],
+ ["Mock papers (own bank, timed)",["Paper 1, 100 Qs: 50 chest/CVS, 45 MSK, 5 breast/women's","Paper 2, 100 Qs: 40 CNS, 10 head & neck, 35 GI, 15 GU","Paeds questions spread through both papers","Review every wrong or guessed question"]],
+ ["Evening",["Read through the full error log"]]]},
+{id:"d26",date:"2026-10-26",dow:"Mon",label:"26 Oct",title:"Light revision",sub:"Day before",groups:[
+ ["Study",["About 40 error-log questions only","Light review of weak areas","No new material"]],
+ ["Admin",["Documents and ID ready","Route and venue checked","In bed early"]]]},
+{id:"d27",date:"2026-10-27",dow:"Tue",label:"27 Oct",title:"Exam day",sub:"Nothing heavy",groups:[
+ ["Today",["Light breakfast, arrive early","Optional: skim the error log, then stop","Sit the exam"]]]}
+];
+
+var KEY="mrad-checklist-v1", state={};
+try{state=JSON.parse(localStorage.getItem(KEY)||"{}")||{}}catch(e){state={}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+
+var todayStr=(function(){var n=new Date();return n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")+"-"+String(n.getDate()).padStart(2,"0")})();
+var list=document.getElementById("list");
+var total=0;
+D.forEach(function(d){
+  var sec=document.createElement("section"); sec.className="day"+(d.date===todayStr?" today":""); sec.id=d.id;
+  var btn=document.createElement("button"); btn.type="button";
+  var open=d.date===todayStr||(todayStr<D[0].date&&d===D[0])||(todayStr>D[D.length-1].date&&d===D[D.length-1]);
+  var body=document.createElement("div"); body.className="body"; body.hidden=!open;
+  btn.setAttribute("aria-expanded",open);
+  var n=0;
+  d.groups.forEach(function(g,gi){
+    var h=document.createElement("div"); h.className="grp"; h.textContent=g[0]; body.appendChild(h);
+    g[1].forEach(function(t,ti){
+      var id=d.id+"-"+gi+"-"+ti, lb=document.createElement("label");
+      var cb=document.createElement("input"); cb.type="checkbox"; cb.id=id; cb.checked=!!state[id];
+      cb.addEventListener("change",function(){ if(cb.checked)state[id]=1; else delete state[id]; save(); refresh(); });
+      var sp=document.createElement("span"); sp.textContent=t;
+      lb.appendChild(cb); lb.appendChild(sp); body.appendChild(lb); n++;
+    });
+  });
+  if(d.note){var nt=document.createElement("div"); nt.className="note"; nt.textContent=d.note; body.appendChild(nt);}
+  d.n=n; total+=n;
+  btn.innerHTML='<span class="date"><small></small></span><span class="title"></span><span class="badge"></span>';
+  btn.querySelector(".date").insertAdjacentText("afterbegin",d.label);
+  btn.querySelector("small").textContent=d.dow;
+  var tt=btn.querySelector(".title"); tt.textContent=d.title;
+  if(d.date===todayStr){var tg=document.createElement("span"); tg.className="tag"; tg.textContent="today"; tt.appendChild(tg);}
+  var sm=document.createElement("small"); sm.textContent=d.sub; tt.appendChild(sm);
+  btn.addEventListener("click",function(){ var o=body.hidden; body.hidden=!o; btn.setAttribute("aria-expanded",o); });
+  sec.appendChild(btn); sec.appendChild(body); list.appendChild(sec);
+});
+
+function refresh(){
+  var done=0;
+  D.forEach(function(d){
+    var c=0; for(var k in state){ if(k.indexOf(d.id+"-")===0)c++; }
+    done+=c;
+    var b=document.querySelector("#"+d.id+" .badge"); b.textContent=c+"/"+d.n; b.className="badge"+(c===d.n?" full":"");
+  });
+  var p=total?Math.round(done/total*100):0;
+  document.getElementById("ovl").textContent=done+" of "+total+" tasks";
+  document.getElementById("ovp").textContent=p+"%";
+  document.getElementById("ovb").style.width=p+"%";
+}
+var exam=new Date(2026,9,27), now=new Date(); now=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+document.getElementById("days").textContent=Math.max(0,Math.round((exam-now)/864e5));
+refresh();
+
+var r1=document.getElementById("reset"), r2=document.getElementById("reset2");
+r1.addEventListener("click",function(){r1.hidden=true;r2.hidden=false;});
+r2.addEventListener("click",function(){
+  state={}; save();
+  document.querySelectorAll("#list input").forEach(function(i){i.checked=false});
+  refresh(); r2.hidden=true; r1.hidden=false;
+});
+</script>
+
+</body></html>
