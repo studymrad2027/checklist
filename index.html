@@ -445,8 +445,34 @@ function pull(){
     }
     setSync("Synced");
     if(!editing()&&applyCarry())render();
+    pullProgress();
   }).catch(function(){setSync("Offline: saved on this device");if(!editing()&&applyCarry())render();});
 }
+
+/* RadWise progress: ticks every set whose target count has been reached. Never unticks. */
+function applyProgress(cats){
+  var ch=false;
+  D.forEach(function(d){model[d.id].forEach(function(g){g.items.forEach(function(it){
+    if(it.cat&&!it.done&&cats[it.cat]&&cats[it.cat].a>=it.upto){it.done=true;ch=true;}
+  });});});
+  if(ch)save();
+  return ch;
+}
+function pullProgress(){
+  fetch(SB_URL+"/rest/v1/checklist?id=eq.radwise&select=data",{headers:SB_H})
+  .then(function(r){return r.ok?r.json():[];})
+  .then(function(rows){
+    var c=rows.length&&rows[0].data&&rows[0].data.cats;
+    if(c&&applyProgress(c)&&!editing())render();
+  }).catch(function(){});
+}
+(function(){
+  var h=location.hash;
+  if(h.indexOf("#rw=")===0){
+    try{var o=JSON.parse(decodeURIComponent(h.slice(4))), c=o.cats||o; if(applyProgress(c))render(); setSync("RadWise progress added");}catch(e){}
+    try{history.replaceState(null,"",location.pathname+location.search);}catch(e){}
+  }
+})();
 pull();
 document.addEventListener("visibilitychange",function(){if(!document.hidden)pull();});
 setInterval(function(){if(!document.hidden)pull();},20000);
