@@ -82,6 +82,7 @@ label span{min-width:0}
 .txt:empty::before{content:attr(data-ph);color:var(--muted)}
 .mn{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
 .mn .txt{flex:none}
+.prog{align-self:flex-start;font-family:var(--font-mono);font-size:.72rem;color:var(--muted)}
 .carry{align-self:flex-start;font-family:var(--font-mono);font-size:.72rem;color:var(--warn);background:var(--warn-soft);padding:1px 8px;border-radius:99px}
 .grip{all:unset;box-sizing:border-box;flex:none;width:30px;height:30px;display:grid;place-items:center;border-radius:8px;color:var(--muted);font-size:1rem;letter-spacing:-3px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .grip:hover{background:var(--accent-soft);color:var(--accent)}
@@ -371,6 +372,7 @@ function render(){
           else{ tx.scrollLeft=0; }
         });
         var mn=document.createElement("div"); mn.className="mn"; mn.appendChild(tx);
+        if(it.sub&&it.n!=null){var pg=document.createElement("span"); pg.className="prog"; pg.textContent=(it.a||0)+" / "+it.n+" answered"; mn.appendChild(pg);}
         if(it.from){var cp=document.createElement("span"); cp.className="carry"; cp.textContent="\u21aa Carried from "+it.from; mn.appendChild(cp);}
         var gr=document.createElement("button"); gr.type="button"; gr.className="grip"; gr.textContent="\u22ee\u22ee";
         gr.setAttribute("aria-label","Drag to move to another day"); gr.setAttribute("title","Drag to move");
@@ -453,7 +455,12 @@ function pull(){
 function applyProgress(cats){
   var ch=false;
   D.forEach(function(d){model[d.id].forEach(function(g){g.items.forEach(function(it){
-    if(it.cat&&!it.done&&cats[it.cat]&&cats[it.cat].a>=it.upto){it.done=true;ch=true;}
+    if(!it.cat)return;
+    var c=cats[it.cat], sv=c&&c.subs&&it.sub?c.subs[it.sub]:null;
+    if(sv){
+      if(it.a!==sv.a||it.n!==sv.n){it.a=sv.a;it.n=sv.n;ch=true;}
+      if(!it.done&&sv.a>=sv.n){it.done=true;ch=true;}
+    }else if(it.upto&&!it.done&&c&&c.a>=it.upto){it.done=true;ch=true;}
   });});});
   if(ch)save();
   return ch;
