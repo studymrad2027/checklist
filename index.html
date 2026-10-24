@@ -149,32 +149,31 @@ var D=[
  ["RadWise",["Cardiothoracic and Vascular: 120 questions (sets of 50, review each set)"]],
  ["Theory",["Lung, ILD and pleura chapters"]],
  ["Evening",["Error log written"]]]},
-{id:"d20",date:"2026-10-20",dow:"Tue",label:"20 Oct",title:"Finish chest, start MSK",sub:"190 RadWise questions",groups:[
+{id:"d20",date:"2026-10-20",dow:"Tue",label:"20 Oct",title:"Cardiothoracic",sub:"Past day",groups:[
  ["RadWise",["Finish Cardiothoracic and Vascular: 59 questions (category done)","Musculoskeletal and Trauma: 131 questions"]],
  ["Theory",["Cardiac, aorta and vascular chapters"]],
  ["Evening",["Own bank: 30 to 40 questions (chest or MSK)","Error log written"]]]},
-{id:"d21",date:"2026-10-21",dow:"Wed",label:"21 Oct",title:"Finish MSK, start Neuro",sub:"190 RadWise questions",groups:[
+{id:"d21",date:"2026-10-21",dow:"Wed",label:"21 Oct",title:"Cardiothoracic and MSK",sub:"Past day",groups:[
  ["RadWise",["Finish Musculoskeletal and Trauma: 48 questions (category done)","Neuro and Head & Neck: 142 questions"]],
  ["Theory",["MSK tumours, arthritis and trauma chapters"]],
  ["Evening",["Own bank: 30 to 40 questions (MSK or neuro)","Error log written"]]]},
-{id:"d22",date:"2026-10-22",dow:"Thu",label:"22 Oct",title:"Finish Neuro, start GI",sub:"190 RadWise questions",groups:[
+{id:"d22",date:"2026-10-22",dow:"Thu",label:"22 Oct",title:"MSK and Cardiothoracic",sub:"Past day",groups:[
  ["RadWise",["Finish Neuro and Head & Neck: 35 questions (category done)","Gastro-Intestinal: 155 questions"]],
  ["Theory",["Brain and spine chapters","Head and neck chapter"]],
  ["Evening",["Own bank: 30 to 40 questions (neuro or head & neck)","Error log written"]]]},
-{id:"d23",date:"2026-10-23",dow:"Fri",label:"23 Oct",title:"Finish GI, Paediatrics",sub:"189 RadWise questions",groups:[
+{id:"d23",date:"2026-10-23",dow:"Fri",label:"23 Oct",title:"MSK and Neuro",sub:"Past day",groups:[
  ["RadWise",["Finish Gastro-Intestinal: 16 questions (category done)","Paediatrics: 173 questions (category done)"]],
  ["Theory",["Liver, biliary, pancreas and bowel chapters","Paediatric notes across all systems"]],
  ["Evening",["Own bank: 30 to 40 questions (GI)","Error log written","Last day to open a new book"]]]},
-{id:"d24",date:"2026-10-24",dow:"Sat",label:"24 Oct",title:"GU, Obs and Breast",sub:"188 RadWise questions",groups:[
+{id:"d24",date:"2026-10-24",dow:"Sat",label:"24 Oct",title:"Gastro-Intestinal night",sub:"Evening session",groups:[
  ["RadWise",["GU, Adrenal, Obs & Gynae and Breast: 188 questions (skim nuclear medicine, breast and obs)","All six RadWise categories finished"]],
  ["Theory",["GU and male pelvis chapters","Light pass on breast and women's imaging"]],
- ["Evening",["Own bank: 30 to 40 questions (GU or weakest topic)","Error log written"]]],
- note:"Cannot finish everything today? Sunday is the buffer."},
-{id:"d25",date:"2026-10-25",dow:"Sun",label:"25 Oct",title:"Catch-up and mock papers",sub:"Buffer day",groups:[
+ ["Evening",["Own bank: 30 to 40 questions (GU or weakest topic)","Error log written"]]]},
+{id:"d25",date:"2026-10-25",dow:"Sun",label:"25 Oct",title:"Gastro-Intestinal and Neuro",sub:"Main study day",groups:[
  ["Morning",["Finish any RadWise questions still unseen"]],
  ["Mock papers (own bank, timed)",["Paper 1, 100 Qs: 50 chest/CVS, 45 MSK, 5 breast/women's","Paper 2, 100 Qs: 40 CNS, 10 head & neck, 35 GI, 15 GU","Paeds questions spread through both papers","Review every wrong or guessed question"]],
  ["Evening",["Read through the full error log"]]]},
-{id:"d26",date:"2026-10-26",dow:"Mon",label:"26 Oct",title:"Light revision",sub:"Day before",groups:[
+{id:"d26",date:"2026-10-26",dow:"Mon",label:"26 Oct",title:"MSK, GU and Paediatrics",sub:"Last study day, stop by 9 pm",groups:[
  ["Study",["About 40 error-log questions only","Light review of weak areas","No new material"]],
  ["Admin",["Documents and ID ready","Route and venue checked","In bed early"]]]},
 {id:"d27",date:"2026-10-27",dow:"Tue",label:"27 Oct",title:"Exam day",sub:"Nothing heavy",groups:[
@@ -201,17 +200,26 @@ function saveSoon(){clearTimeout(st);st=setTimeout(save,300);}
 var todayStr=(function(){var n=new Date();return n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")+"-"+String(n.getDate()).padStart(2,"0")})();
 var list=document.getElementById("list");
 
+var rwCats=null;
+function qLeft(items){var l=0,has=false;items.forEach(function(i){if(i.sub&&i.n!=null){has=true;l+=Math.max(0,i.n-Math.min(i.a||0,i.n));}});return {l:l,has:has};}
 function counts(d){var n=0,c=0;model[d.id].forEach(function(g){g.items.forEach(function(i){n++;if(i.done)c++})});return [c,n];}
 function refreshCounts(){
-  var done=0,total=0;
+  var planLeft=0, mAns=0, mTot=0;
   D.forEach(function(d){
-    var c=counts(d); done+=c[0]; total+=c[1];
-    var b=document.querySelector("#"+d.id+" .badge");
-    if(b){b.textContent=c[0]+"/"+c[1]; b.className="badge"+(c[1]&&c[0]===c[1]?" full":"");}
+    var all=[]; model[d.id].forEach(function(g){g.items.forEach(function(i){all.push(i)})});
+    var q=qLeft(all), c=counts(d), b=document.querySelector("#"+d.id+" .badge");
+    planLeft+=q.l;
+    all.forEach(function(i){if(i.sub&&i.n!=null){mTot+=i.n;mAns+=Math.min(i.a||0,i.n);}});
+    if(b){
+      if(q.has){b.textContent=q.l?(q.l+" left"):"Done"; b.className="badge"+(q.l?"":" full");}
+      else{b.textContent=c[0]+"/"+c[1]; b.className="badge"+(c[1]&&c[0]===c[1]?" full":"");}
+    }
   });
-  var p=total?Math.round(done/total*100):0;
-  document.getElementById("ovl").textContent=done+" of "+total+" tasks";
-  document.getElementById("ovp").textContent=p+"%";
+  var ans=mAns, tot=mTot, rwLeft=null;
+  if(rwCats){ans=0;tot=0;for(var k in rwCats){ans+=rwCats[k].a;tot+=rwCats[k].n;} rwLeft=tot-ans;}
+  var p=tot?Math.round(ans/tot*100):0;
+  document.getElementById("ovl").textContent=planLeft.toLocaleString()+" questions left in your plan"+(rwLeft!=null?" · "+rwLeft.toLocaleString()+" left in RadWise":"");
+  document.getElementById("ovp").textContent=ans.toLocaleString()+" / "+tot.toLocaleString()+" answered";
   document.getElementById("ovb").style.width=p+"%";
 }
 function flat(d){var a=[];model[d.id].forEach(function(g){g.items.forEach(function(i){a.push({g:g,i:i})})});return a;}
@@ -335,7 +343,7 @@ function render(){
 
     model[d.id].forEach(function(g){
       if(!g.items.length)return;
-      var h=document.createElement("div"); h.className="grp"; h.textContent=g.name; body.appendChild(h);
+      var h=document.createElement("div"); h.className="grp"; var gq=qLeft(g.items); h.textContent=g.name+(gq.has?" \u00b7 "+gq.l+" left":""); body.appendChild(h);
       g.items.forEach(function(it){
         var r=document.createElement("div"); r.className="item"+(it.done?" done":"");
         var ck=document.createElement("button"); ck.type="button"; ck.className="ck"; ck.setAttribute("role","checkbox");
@@ -456,7 +464,7 @@ function pull(){
 
 /* RadWise progress: ticks every set whose target count has been reached. Never unticks. */
 function applyProgress(cats){
-  var ch=false;
+  rwCats=cats; var ch=false;
   D.forEach(function(d){model[d.id].forEach(function(g){g.items.forEach(function(it){
     if(!it.cat)return;
     var c=cats[it.cat], sv=c&&c.subs&&it.sub?c.subs[it.sub]:null;
@@ -466,6 +474,7 @@ function applyProgress(cats){
     }else if(it.upto&&!it.done&&c&&c.a>=it.upto){it.done=true;ch=true;}
   });});});
   if(ch)save();
+  refreshCounts();
   return ch;
 }
 function pullProgress(){
