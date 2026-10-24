@@ -16,7 +16,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>MRAD Study Checklist</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
 html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light dark;-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:hidden;touch-action:manipulation}body{margin:0;font-size:16px;overflow-x:hidden}.txt,.add input{font-size:16px}
 /* Layout: single narrow column; sticky progress header; one card per study day with a ticked task list. */
@@ -102,7 +102,9 @@ label span{min-width:0}
 html{overscroll-behavior-y:contain}
 #ptr{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:50%;margin-left:-80px;width:160px;text-align:center;padding:8px 0;border-radius:99px;background:var(--surface);color:var(--accent);border:1px solid var(--line);box-shadow:0 4px 14px rgba(0,0,0,.15);font:500 .8rem var(--font-mono);transform:translateY(-90px);transition:transform .2s;z-index:70;pointer-events:none}
 .hero{background:var(--accent-soft);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:14px}
-.quote{margin:0;font-size:1.15rem;font-weight:600;line-height:1.35;color:var(--fg);min-height:3.1em;display:flex;align-items:center;text-wrap:balance;transition:opacity .45s}
+.quote{margin:0;font-size:1.1rem;font-weight:600;line-height:1.4;color:var(--fg);min-height:8.5rem;display:flex;flex-direction:column;justify-content:center;gap:6px;text-wrap:balance;transition:opacity .45s}
+.quote .ar{font-family:Amiri,'Traditional Arabic','Geeza Pro',serif;font-size:1.6rem;font-weight:400;line-height:1.7;direction:rtl;text-align:right;color:var(--accent)}
+.quote .ref{font-family:var(--font-mono);font-size:.74rem;font-weight:400;color:var(--muted)}
 .quote.out{opacity:0}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px}
 .stats div{display:flex;flex-direction:column;gap:2px}
@@ -548,26 +550,21 @@ function renderHero(ans,tot){
     r.appendChild(a); r.appendChild(b); r.appendChild(e); box.appendChild(r);
   });
 }
-var QUOTES=[
-  "Every question you answer now is one less surprise on exam day.",
-  "One set at a time. Steady pace beats panic.",
-  "A wrong answer today is a mark saved on Tuesday.",
-  "You do not need to finish everything. You need to cover what the exam weights most.",
-  "Sleep is revision too. Protect your seven hours.",
-  "Read the question twice, then choose the best answer.",
-  "Small progress counts. Tick one more subcategory.",
-  "You planned this well. Trust your preparation.",
-  "Rest when you are tired. A clear head answers faster.",
-  "Look how far you have come since Monday. Keep going."
-];
+var QUOTES=[{"en": "Every question you answer now is one less surprise on exam day."}, {"ar": "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا", "en": "Indeed, with hardship comes ease.", "ref": "Quran 94:5"}, {"en": "One set at a time. Steady pace beats panic."}, {"ar": "لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا", "en": "Allah does not burden a soul beyond what it can bear.", "ref": "Quran 2:286"}, {"en": "A wrong answer today is a mark saved on Tuesday."}, {"en": "Whoever takes a path to seek knowledge, Allah makes easy for him a path to Paradise.", "ref": "Sahih Muslim 2699"}, {"en": "You do not need to finish everything. You need to cover what the exam weights most."}, {"ar": "وَقُل رَّبِّ زِدْنِي عِلْمًا", "en": "My Lord, increase me in knowledge.", "ref": "Quran 20:114"}, {"en": "Sleep is revision too. Protect your seven hours."}, {"ar": "وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ", "en": "A person gets only what they strive for.", "ref": "Quran 53:39"}, {"en": "Read the question twice, then choose the best answer."}, {"en": "The strong believer is better and more beloved to Allah than the weak believer, and there is good in both. Strive for what benefits you, seek Allah's help, and do not give up.", "ref": "Sahih Muslim 2664"}, {"en": "Small progress counts. Tick one more subcategory."}, {"ar": "وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ", "en": "Whoever puts their trust in Allah, He is enough for them.", "ref": "Quran 65:3"}, {"en": "You planned this well. Trust your preparation."}, {"ar": "إِنَّ اللَّهَ مَعَ الصَّابِرِينَ", "en": "Indeed, Allah is with the patient.", "ref": "Quran 2:153"}, {"en": "Rest when you are tired. A clear head answers faster."}, {"ar": "اللَّهُمَّ لَا سَهْلَ إِلَّا مَا جَعَلْتَهُ سَهْلًا، وَأَنْتَ تَجْعَلُ الْحَزْنَ إِذَا شِئْتَ سَهْلًا", "en": "O Allah, nothing is easy except what You make easy, and if You wish, You make the difficult easy.", "ref": "Dua, Ibn Hibban"}, {"en": "Look how far you have come since Monday. Keep going."}, {"ar": "أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ", "en": "In the remembrance of Allah do hearts find peace.", "ref": "Quran 13:28"}, {"ar": "يَرْفَعِ اللَّهُ الَّذِينَ آمَنُوا مِنكُمْ وَالَّذِينَ أُوتُوا الْعِلْمَ دَرَجَاتٍ", "en": "Allah will raise in rank those of you who believe and those who have been given knowledge.", "ref": "Quran 58:11"}, {"ar": "فَإِذَا عَزَمْتَ فَتَوَكَّلْ عَلَى اللَّهِ", "en": "Once you have made your decision, put your trust in Allah.", "ref": "Quran 3:159"}, {"en": "Actions are judged by intentions.", "ref": "Sahih al-Bukhari 1"}];
 (function(){
   var q=document.getElementById("quote"), k=Math.floor(Math.random()*QUOTES.length);
-  q.textContent=QUOTES[k];
+  function show(){
+    var o=QUOTES[k]; q.textContent="";
+    if(o.ar){var a=document.createElement("span");a.className="ar";a.lang="ar";a.dir="rtl";a.textContent=o.ar;q.appendChild(a);}
+    var e=document.createElement("span");e.textContent=o.en;q.appendChild(e);
+    if(o.ref){var r=document.createElement("span");r.className="ref";r.textContent=o.ref;q.appendChild(r);}
+  }
+  show();
   setInterval(function(){
     if(document.hidden)return;
     q.classList.add("out");
-    setTimeout(function(){k=(k+1)%QUOTES.length;q.textContent=QUOTES[k];q.classList.remove("out");},450);
-  },7000);
+    setTimeout(function(){k=(k+1)%QUOTES.length;show();q.classList.remove("out");},450);
+  },9000);
 })();
 refreshCounts();
 
