@@ -101,6 +101,20 @@ label span{min-width:0}
 @media (min-width:1100px){body{font-size:17px}.day>button{padding:16px}.body{padding:8px 16px 16px}}
 html{overscroll-behavior-y:contain}
 #ptr{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:50%;margin-left:-80px;width:160px;text-align:center;padding:8px 0;border-radius:99px;background:var(--surface);color:var(--accent);border:1px solid var(--line);box-shadow:0 4px 14px rgba(0,0,0,.15);font:500 .8rem var(--font-mono);transform:translateY(-90px);transition:transform .2s;z-index:70;pointer-events:none}
+.hero{background:var(--accent-soft);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:14px}
+.quote{margin:0;font-size:1.15rem;font-weight:600;line-height:1.35;color:var(--fg);min-height:3.1em;display:flex;align-items:center;text-wrap:balance;transition:opacity .45s}
+.quote.out{opacity:0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px}
+.stats div{display:flex;flex-direction:column;gap:2px}
+.stats b{font-family:var(--font-mono);font-size:1.5rem;font-weight:500;color:var(--accent);line-height:1.1}
+.stats span{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.cats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:8px 18px}
+.cat{display:grid;grid-template-columns:6.5rem 1fr auto;align-items:center;gap:10px;font-size:.85rem}
+.cat span{min-width:0;overflow-wrap:anywhere}
+.cat .cb{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.cat .cb i{display:block;height:100%;background:var(--accent);border-radius:3px}
+.cat em{font-style:normal;font-family:var(--font-mono);font-size:.78rem;color:var(--muted);white-space:nowrap}
+@media (prefers-reduced-motion:reduce){.quote{transition:none}}
 @media (prefers-reduced-motion:reduce){.bar i{transition:none}}
 </style>
 
@@ -108,9 +122,20 @@ html{overscroll-behavior-y:contain}
   <div class="top">
     <div>
       <h1>MRAD Study Checklist</h1>
-      <p class="sub">SBA exam, Tue 27 Oct 2026. 1,067 RadWise questions to finish, theory to revise. <span id="sync"></span></p>
+      <p class="sub">SBA exam, Tue 27 Oct 2026. <span id="sync"></span></p>
     </div>
     <div class="count"><b id="days">–</b><span id="cdl">to exam</span></div>
+  </div>
+
+  <div class="hero" id="hero">
+    <p class="quote" id="quote" aria-live="off"></p>
+    <div class="stats">
+      <div><b id="hAns">–</b><span>answered</span></div>
+      <div><b id="hLeft">–</b><span>left</span></div>
+      <div><b id="hPct">–</b><span>of RadWise</span></div>
+      <div><b id="hGain">–</b><span>since Mon 19 Oct</span></div>
+    </div>
+    <div class="cats" id="hCats"></div>
   </div>
 
   <div class="overall">
@@ -119,7 +144,7 @@ html{overscroll-behavior-y:contain}
   </div>
 
   <div class="rhythm">
-    <h2>Daily rhythm (Mon 19 to Sat 24)</h2>
+    <h2>Study rhythm</h2>
     <ul>
       <li>Morning, 3.5 to 4 h: RadWise in sets of 50, review each set straight after.</li>
       <li>Afternoon, 3 h: theory books, active notes, not passive reading.</li>
@@ -223,6 +248,7 @@ function refreshCounts(){
   document.getElementById("ovl").textContent=planLeft.toLocaleString()+" questions left in your plan"+(rwLeft!=null?" · "+rwLeft.toLocaleString()+" left in RadWise":"");
   document.getElementById("ovp").textContent=ans.toLocaleString()+" / "+tot.toLocaleString()+" answered";
   document.getElementById("ovb").style.width=p+"%";
+  renderHero(ans,tot);
 }
 function flat(d){var a=[];model[d.id].forEach(function(g){g.items.forEach(function(i){a.push({g:g,i:i})})});return a;}
 function cleanTxt(el){return el.textContent.replace(/\s+/g," ").trim();}
@@ -497,6 +523,54 @@ function pullProgress(){
 pull();
 document.addEventListener("visibilitychange",function(){if(!document.hidden)pull();});
 setInterval(function(){if(!document.hidden)pull();},20000);
+
+/* Top card: summary plus rotating encouragement. */
+var START_ANSWERED=23, SHORT={"Cardiothoracic and Vascular":"Cardio","GU, Adrenal, Obs & Gynae and Breast":"GU / Obs / Breast","Gastro-Intestinal":"GI","Musculoskeletal and Trauma":"MSK","Neuro and Head & Neck":"Neuro / H&N","Paediatrics":"Paeds"};
+function catTotals(){
+  if(rwCats)return rwCats;
+  var o={}; D.forEach(function(d){model[d.id].forEach(function(g){g.items.forEach(function(i){
+    if(i.cat&&i.n!=null){var c=o[i.cat]||(o[i.cat]={a:0,n:0});c.a+=Math.min(i.a||0,i.n);c.n+=i.n;}});});});
+  return o;
+}
+function renderHero(ans,tot){
+  if(typeof SHORT==="undefined")return;
+  var f=function(n){return n.toLocaleString();};
+  document.getElementById("hAns").textContent=f(ans);
+  document.getElementById("hLeft").textContent=f(Math.max(0,tot-ans));
+  document.getElementById("hPct").textContent=(tot?Math.round(ans/tot*100):0)+"%";
+  document.getElementById("hGain").textContent="+"+f(Math.max(0,ans-START_ANSWERED));
+  var box=document.getElementById("hCats"), o=catTotals(); box.innerHTML="";
+  Object.keys(o).forEach(function(k){
+    var c=o[k], r=document.createElement("div"); r.className="cat";
+    var a=document.createElement("span"); a.textContent=SHORT[k]||k;
+    var b=document.createElement("div"); b.className="cb"; var i=document.createElement("i"); i.style.width=(c.n?Math.round(c.a/c.n*100):0)+"%"; b.appendChild(i);
+    var e=document.createElement("em"); e.textContent=c.a+" / "+c.n;
+    r.appendChild(a); r.appendChild(b); r.appendChild(e); box.appendChild(r);
+  });
+}
+var QUOTES=[
+  "Every question you answer now is one less surprise on exam day.",
+  "One set at a time. Steady pace beats panic.",
+  "A wrong answer today is a mark saved on Tuesday.",
+  "You do not need to finish everything. You need to cover what the exam weights most.",
+  "Sleep is revision too. Protect your seven hours.",
+  "Read the question twice, then choose the best answer.",
+  "Small progress counts. Tick one more subcategory.",
+  "You planned this well. Trust your preparation.",
+  "Rest when you are tired. A clear head answers faster.",
+  "Look how far you have come since Monday. Keep going."
+];
+(function(){
+  var q=document.getElementById("quote"), k=Math.floor(Math.random()*QUOTES.length);
+  q.textContent=QUOTES[k];
+  setInterval(function(){
+    if(document.hidden)return;
+    q.classList.add("out");
+    setTimeout(function(){k=(k+1)%QUOTES.length;q.textContent=QUOTES[k];q.classList.remove("out");},450);
+  },7000);
+})();
+refreshCounts();
+
 /* Pull to refresh (iPhone home-screen apps have none built in). */
 (function(){
   var el=document.createElement("div"); el.id="ptr"; el.setAttribute("aria-hidden","true"); document.body.appendChild(el);
