@@ -587,6 +587,37 @@ function clockTick(){
   clockEl.innerHTML=(p?s.slice(0,p.index):s)+(p?"<small>"+p[1].toUpperCase()+"</small>":"");
 }
 clockTick(); setInterval(clockTick,1000);
+
+/* Auto-update: about once a minute, ask GitHub Pages whether index.html changed (a cheap conditional request).
+   If it did, reload, but never while typing or dragging. Plan data lives in Supabase, so a reload loses nothing. */
+(function(){
+  var KEY="mrad-page-ver", busy=false;
+  function hash(t){var h=5381,i;for(i=0;i<t.length;i++){h=((h<<5)+h+t.charCodeAt(i))|0;}return t.length+":"+h;}
+  function editing(){
+    var a=document.activeElement;
+    return !!((a&&(a.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)))||document.querySelector(".item.dragging"));
+  }
+  function check(){
+    if(busy||document.hidden||!navigator.onLine)return;
+    busy=true;
+    fetch(location.pathname,{cache:"no-cache"}).then(function(r){return r.ok?r.text():null;}).then(function(t){
+      busy=false; if(!t)return;
+      var h=hash(t), old=null;
+      try{old=localStorage.getItem(KEY);}catch(e){}
+      if(old===null){try{localStorage.setItem(KEY,h);}catch(e){} return;}
+      if(old===h)return;
+      apply(h);
+    }).catch(function(){busy=false;});
+  }
+  function apply(h){
+    if(editing())return; /* try again at the next check */
+    try{localStorage.setItem(KEY,h);}catch(e){}
+    location.reload();
+  }
+  setInterval(check,60000);
+  document.addEventListener("visibilitychange",function(){if(!document.hidden)check();});
+  setTimeout(check,3000);
+})();
 applyCarry(true);
 render();
 
