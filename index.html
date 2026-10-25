@@ -120,6 +120,9 @@ html{overscroll-behavior-y:contain}
 /* Tabs, title bar and Today view */
 .top{align-items:center}
 .ttl{min-width:0;flex:1 1 220px}
+.tline{display:flex;align-items:baseline;flex-wrap:wrap;column-gap:14px}
+.clock{font-family:var(--font-mono);font-size:1.35rem;font-weight:500;color:var(--accent);white-space:nowrap;font-variant-numeric:tabular-nums}
+.clock small{font-size:.75rem;color:var(--muted);margin-left:3px;letter-spacing:.06em}
 .tabs{display:flex;gap:4px;background:var(--line);padding:4px;border-radius:12px}
 .tabs button{font:inherit;font-weight:600;font-size:.95rem;color:var(--muted);background:transparent;border:0;border-radius:9px;padding:8px 20px;cursor:pointer}
 .tabs button[aria-selected="true"]{background:var(--surface);color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.12)}
@@ -198,7 +201,7 @@ html{overscroll-behavior-y:contain}
 <div class="wrap app" id="app">
   <header class="top">
     <div class="ttl">
-      <h1>MRAD Study Checklist</h1>
+      <div class="tline"><h1>MRAD Study Checklist</h1><time class="clock" id="clock" aria-label="Current time"></time></div>
       <p class="sub">SBA exam, Tue 27 Oct 2026. <span id="sync"></span></p>
     </div>
     <div class="tabs" role="tablist" aria-label="Views">
@@ -577,6 +580,13 @@ function tick(){
   document.getElementById("cdl").textContent=ms?(m+" min to exam"):"exam time";
 }
 tick(); setInterval(tick,30000);
+var clockEl=document.getElementById("clock"), clockFmt;
+try{clockFmt=new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Kuala_Lumpur",hour:"numeric",minute:"2-digit",hour12:true});}catch(e){clockFmt=null;}
+function clockTick(){
+  var d=new Date(), s=clockFmt?clockFmt.format(d):d.toLocaleTimeString([], {hour:"numeric",minute:"2-digit"}), p=s.match(/\s*(am|pm)$/i);
+  clockEl.innerHTML=(p?s.slice(0,p.index):s)+(p?"<small>"+p[1].toUpperCase()+"</small>":"");
+}
+clockTick(); setInterval(clockTick,1000);
 applyCarry(true);
 render();
 
