@@ -152,7 +152,7 @@ html{overscroll-behavior-y:contain}
 @media (min-width:760px){
   .hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:10px 28px;align-items:center}
   .hero .quote{grid-row:1 / span 2;min-height:6.5rem;font-size:clamp(1.05rem,2.4vh,1.5rem)}
-  .hero .quote .ar{font-size:clamp(1.4rem,3.2vh,2rem)}
+  .hero .quote .ar{font-size:1.45em}
   .hero .cats{grid-template-columns:repeat(2,minmax(0,1fr))}
   .hero .cat{grid-template-columns:5.6rem 1fr auto;font-size:.8rem}
 }
@@ -166,7 +166,6 @@ html{overscroll-behavior-y:contain}
   .app.fit .thead{padding-bottom:6px}
   .app.fit .stats b{font-size:clamp(1.1rem,2.6vh,1.5rem)}
   .app.fit .hero{gap:6px 24px}
-  .app.fit .hero .quote{min-height:0}
   .app.fit .rulesbar{font-size:.75rem}
   .app.fit .rulesbar li{padding:2px 10px}
   .app.fit .hero{padding:12px 16px}
@@ -176,6 +175,22 @@ html{overscroll-behavior-y:contain}
   .app.fit .prog,.app.fit .carry{font-size:.72em}
 }
 @media (max-width:620px){.fs span{display:none}.tabs button{padding:8px 14px}}
+
+/* Progress card: fixed size, whole-progress only */
+.quote{height:9.5rem;min-height:0;overflow:hidden;font-size:1.1rem}
+.quote .ar{font-size:1.45em}
+.side{display:flex;flex-direction:column;gap:12px;justify-content:center;min-width:0}
+.stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+.stats b{font-size:clamp(1.05rem,4.6vw,1.6rem);white-space:nowrap}
+.stats span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hbar{height:10px;background:var(--line);border-radius:5px;overflow:hidden}
+.hbar i{display:block;height:100%;width:0;background:var(--accent);border-radius:5px;transition:width .3s}
+@media (min-width:760px){
+  .hero{box-sizing:border-box;height:clamp(170px,19vh,200px);grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:stretch}
+  .hero .quote{height:100%;grid-row:auto;font-size:1.3rem}
+  .stats b{font-size:clamp(1.2rem,3.4vh,1.8rem)}
+}
+@media (prefers-reduced-motion:reduce){.hbar i{transition:none}}
 @media (prefers-reduced-motion:reduce){.quote{transition:none}}
 @media (prefers-reduced-motion:reduce){.bar i{transition:none}}
 </style>
@@ -199,13 +214,15 @@ html{overscroll-behavior-y:contain}
   <main id="tabToday" class="tab">
     <div class="hero" id="hero">
       <p class="quote" id="quote" aria-live="off"></p>
+      <div class="side">
       <div class="stats">
         <div><b id="hAns">–</b><span>answered</span></div>
         <div><b id="hLeft">–</b><span>left</span></div>
-        <div><b id="hPct">–</b><span>of RadWise</span></div>
-        <div><b id="hGain">–</b><span>since Mon 19 Oct</span></div>
+        <div><b id="hPct">–</b><span>done</span></div>
+        <div><b id="hGain">–</b><span>gained</span></div>
       </div>
-      <div class="cats" id="hCats"></div>
+      <div class="hbar" aria-hidden="true"><i id="hBar"></i></div>
+    </div>
     </div>
 
     <ul class="rulesbar" aria-label="Rules">
@@ -653,14 +670,7 @@ function renderHero(ans,tot){
   document.getElementById("hLeft").textContent=f(Math.max(0,tot-ans));
   document.getElementById("hPct").textContent=(tot?Math.round(ans/tot*100):0)+"%";
   document.getElementById("hGain").textContent="+"+f(Math.max(0,ans-START_ANSWERED));
-  var box=document.getElementById("hCats"), o=catTotals(); box.innerHTML="";
-  Object.keys(o).forEach(function(k){
-    var c=o[k], r=document.createElement("div"); r.className="cat";
-    var a=document.createElement("span"); a.textContent=SHORT[k]||k;
-    var b=document.createElement("div"); b.className="cb"; var i=document.createElement("i"); i.style.width=(c.n?Math.round(c.a/c.n*100):0)+"%"; b.appendChild(i);
-    var e=document.createElement("em"); e.textContent=c.a+" / "+c.n;
-    r.appendChild(a); r.appendChild(b); r.appendChild(e); box.appendChild(r);
-  });
+  var hb=document.getElementById("hBar"); if(hb)hb.style.width=(tot?Math.round(ans/tot*100):0)+"%";
 }
 var QUOTES=[{"en": "Every question you answer now is one less surprise on exam day."}, {"ar": "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا", "en": "Indeed, with hardship comes ease.", "ref": "Quran 94:5"}, {"en": "One set at a time. Steady pace beats panic."}, {"ar": "لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا", "en": "Allah does not burden a soul beyond what it can bear.", "ref": "Quran 2:286"}, {"en": "A wrong answer today is a mark saved on Tuesday."}, {"en": "Whoever takes a path to seek knowledge, Allah makes easy for him a path to Paradise.", "ref": "Sahih Muslim 2699"}, {"en": "You do not need to finish everything. You need to cover what the exam weights most."}, {"ar": "وَقُل رَّبِّ زِدْنِي عِلْمًا", "en": "My Lord, increase me in knowledge.", "ref": "Quran 20:114"}, {"en": "Sleep is revision too. Protect your seven hours."}, {"ar": "وَأَن لَّيْسَ لِلْإِنسَانِ إِلَّا مَا سَعَىٰ", "en": "A person gets only what they strive for.", "ref": "Quran 53:39"}, {"en": "Read the question twice, then choose the best answer."}, {"en": "The strong believer is better and more beloved to Allah than the weak believer, and there is good in both. Strive for what benefits you, seek Allah's help, and do not give up.", "ref": "Sahih Muslim 2664"}, {"en": "Small progress counts. Tick one more subcategory."}, {"ar": "وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ", "en": "Whoever puts their trust in Allah, He is enough for them.", "ref": "Quran 65:3"}, {"en": "You planned this well. Trust your preparation."}, {"ar": "إِنَّ اللَّهَ مَعَ الصَّابِرِينَ", "en": "Indeed, Allah is with the patient.", "ref": "Quran 2:153"}, {"en": "Rest when you are tired. A clear head answers faster."}, {"ar": "اللَّهُمَّ لَا سَهْلَ إِلَّا مَا جَعَلْتَهُ سَهْلًا، وَأَنْتَ تَجْعَلُ الْحَزْنَ إِذَا شِئْتَ سَهْلًا", "en": "O Allah, nothing is easy except what You make easy, and if You wish, You make the difficult easy.", "ref": "Dua, Ibn Hibban"}, {"en": "Look how far you have come since Monday. Keep going."}, {"ar": "أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ", "en": "In the remembrance of Allah do hearts find peace.", "ref": "Quran 13:28"}, {"ar": "يَرْفَعِ اللَّهُ الَّذِينَ آمَنُوا مِنكُمْ وَالَّذِينَ أُوتُوا الْعِلْمَ دَرَجَاتٍ", "en": "Allah will raise in rank those of you who believe and those who have been given knowledge.", "ref": "Quran 58:11"}, {"ar": "فَإِذَا عَزَمْتَ فَتَوَكَّلْ عَلَى اللَّهِ", "en": "Once you have made your decision, put your trust in Allah.", "ref": "Quran 3:159"}, {"en": "Actions are judged by intentions.", "ref": "Sahih al-Bukhari 1"}];
 (function(){
@@ -670,7 +680,15 @@ var QUOTES=[{"en": "Every question you answer now is one less surprise on exam d
     if(o.ar){var a=document.createElement("span");a.className="ar";a.lang="ar";a.dir="rtl";a.textContent=o.ar;q.appendChild(a);}
     var e=document.createElement("span");e.textContent=o.en;q.appendChild(e);
     if(o.ref){var r=document.createElement("span");r.className="ref";r.textContent=o.ref;q.appendChild(r);}
+    fitQuote();
   }
+  function fitQuote(){
+    var max=window.innerWidth>=760?Math.min(26,Math.max(16,window.innerHeight*0.03)):18, f=max;
+    q.style.fontSize=f+"px";
+    while(f>9&&q.scrollHeight>q.clientHeight+1){f-=0.5;q.style.fontSize=f+"px";}
+  }
+  window.addEventListener("resize",fitQuote);
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fitQuote);
   show();
   setInterval(function(){
     if(document.hidden)return;
