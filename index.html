@@ -33,7 +33,7 @@ html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset
   --bg:#0e171d; --surface:#15222a; --fg:#e4edf2; --muted:#93a7b4; --line:#26373f;
   --accent:#4cc3d6; --accent-soft:#12343b; --done:#5fc98a; --warn:#f0a064; --warn-soft:#3a2615; color-scheme:dark}
 body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 24px}
 .wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
 h1{font-size:1.6rem;margin:0;font-weight:600;letter-spacing:-.01em;text-wrap:balance}
 .sub{color:var(--muted);margin:4px 0 0}
@@ -116,60 +116,148 @@ html{overscroll-behavior-y:contain}
 .cat .cb{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
 .cat .cb i{display:block;height:100%;background:var(--accent);border-radius:3px}
 .cat em{font-style:normal;font-family:var(--font-mono);font-size:.78rem;color:var(--muted);white-space:nowrap}
+
+/* Tabs, title bar and Today view */
+.top{align-items:center}
+.ttl{min-width:0;flex:1 1 220px}
+.tabs{display:flex;gap:4px;background:var(--line);padding:4px;border-radius:12px}
+.tabs button{font:inherit;font-weight:600;font-size:.95rem;color:var(--muted);background:transparent;border:0;border-radius:9px;padding:8px 20px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.tabs button:focus-visible,.fs:focus-visible,.addbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tright{display:flex;align-items:center;gap:14px}
+.count{text-align:right}
+.fs{font:inherit;font-size:.85rem;display:flex;align-items:center;gap:6px;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:8px 12px;cursor:pointer}
+.tab{display:flex;flex-direction:column;gap:12px}
+.tab[hidden]{display:none}
+.sec{font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:8px 0 0;font-weight:600}
+#listUp{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));align-items:start;gap:12px}
+.rulesbar{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px 8px;font-size:.82rem;color:var(--muted)}
+.rulesbar li{background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:4px 12px}
+.target{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 18px;display:flex;flex-direction:column;gap:10px;min-height:0;flex:1}
+.thead{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px 16px;border-bottom:1px solid var(--line);padding-bottom:10px}
+.tt1{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.tdate{font-family:var(--font-mono);font-weight:500;font-size:1.15em;color:var(--accent)}
+.ttitle{font-weight:600;font-size:1.1em}
+.tmeta{display:flex;align-items:center;gap:12px}
+.tdone{font-family:var(--font-mono);font-size:.85em;color:var(--muted)}
+.addbtn{font:inherit;font-size:.85em;background:var(--accent-soft);color:var(--accent);border:0;border-radius:8px;padding:6px 12px;cursor:pointer;font-weight:600}
+.tg{columns:3 280px;column-gap:32px;flex:1;min-height:0;overflow:auto}
+.tg .gwrap{break-inside:avoid;margin-bottom:12px}
+.tg .mn{flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:0 10px}
+.tg .mn .txt{flex:0 1 auto}
+.tg .grp{margin:0 0 2px}
+.tg .item{padding:5px 0}
+.gwrap{display:flex;flex-direction:column}
+.badge{white-space:nowrap}
+@media (min-width:760px){
+  .hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:10px 28px;align-items:center}
+  .hero .quote{grid-row:1 / span 2;min-height:6.5rem;font-size:clamp(1.05rem,2.4vh,1.5rem)}
+  .hero .quote .ar{font-size:clamp(1.4rem,3.2vh,2rem)}
+  .hero .cats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hero .cat{grid-template-columns:5.6rem 1fr auto;font-size:.8rem}
+}
+@media (min-width:700px) and (min-height:560px){
+  .app.fit{height:calc(100dvh - 40px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));gap:8px}
+  .app.fit>#tabToday{flex:1;min-height:0}
+  .app.fit .target{font-size:clamp(12px,1.85vh,19px);padding:10px 16px;gap:6px}
+  .app.fit .tg .item{padding:3px 0;gap:10px}
+  .app.fit .tg .grp{font-size:.68em}
+  .app.fit .tg .gwrap{margin-bottom:8px}
+  .app.fit .thead{padding-bottom:6px}
+  .app.fit .stats b{font-size:clamp(1.1rem,2.6vh,1.5rem)}
+  .app.fit .hero{gap:6px 24px}
+  .app.fit .hero .quote{min-height:0}
+  .app.fit .rulesbar{font-size:.75rem}
+  .app.fit .rulesbar li{padding:2px 10px}
+  .app.fit .hero{padding:12px 16px}
+  .app.fit h1{font-size:clamp(1.1rem,2.6vh,1.6rem)}
+  .app.fit .ck{width:1.35em;height:1.35em}
+  .app.fit .item .txt{font-size:1em}
+  .app.fit .prog,.app.fit .carry{font-size:.72em}
+}
+@media (max-width:620px){.fs span{display:none}.tabs button{padding:8px 14px}}
 @media (prefers-reduced-motion:reduce){.quote{transition:none}}
 @media (prefers-reduced-motion:reduce){.bar i{transition:none}}
 </style>
 
-<div class="wrap">
-  <div class="top">
-    <div>
+<div class="wrap app" id="app">
+  <header class="top">
+    <div class="ttl">
       <h1>MRAD Study Checklist</h1>
       <p class="sub">SBA exam, Tue 27 Oct 2026. <span id="sync"></span></p>
     </div>
-    <div class="count"><b id="days">–</b><span id="cdl">to exam</span></div>
-  </div>
-
-  <div class="hero" id="hero">
-    <p class="quote" id="quote" aria-live="off"></p>
-    <div class="stats">
-      <div><b id="hAns">–</b><span>answered</span></div>
-      <div><b id="hLeft">–</b><span>left</span></div>
-      <div><b id="hPct">–</b><span>of RadWise</span></div>
-      <div><b id="hGain">–</b><span>since Mon 19 Oct</span></div>
+    <div class="tabs" role="tablist" aria-label="Views">
+      <button type="button" role="tab" id="tbT" aria-selected="true">Today</button>
+      <button type="button" role="tab" id="tbO" aria-selected="false">Old</button>
     </div>
-    <div class="cats" id="hCats"></div>
-  </div>
+    <div class="tright">
+      <div class="count"><b id="days">–</b><span id="cdl">to exam</span></div>
+      <button type="button" id="fsBtn" class="fs" aria-label="Full screen" title="Full screen">&#x26F6;<span>Full screen</span></button>
+    </div>
+  </header>
 
-  <div class="overall">
-    <div class="row"><span id="ovl">0 of 0 tasks</span><span id="ovp">0%</span></div>
-    <div class="bar"><i id="ovb"></i></div>
-  </div>
+  <main id="tabToday" class="tab">
+    <div class="hero" id="hero">
+      <p class="quote" id="quote" aria-live="off"></p>
+      <div class="stats">
+        <div><b id="hAns">–</b><span>answered</span></div>
+        <div><b id="hLeft">–</b><span>left</span></div>
+        <div><b id="hPct">–</b><span>of RadWise</span></div>
+        <div><b id="hGain">–</b><span>since Mon 19 Oct</span></div>
+      </div>
+      <div class="cats" id="hCats"></div>
+    </div>
 
-  <div class="rhythm">
-    <h2>Study rhythm</h2>
-    <ul>
-      <li>Morning, 3.5 to 4 h: RadWise in sets of 50, review each set straight after.</li>
-      <li>Afternoon, 3 h: theory books, active notes, not passive reading.</li>
-      <li>Evening, 1 to 1.5 h: 30 to 40 questions from your own bank, then the error log.</li>
-      <li>Sleep at least 7 h.</li>
+    <ul class="rulesbar" aria-label="Rules">
+      <li>Keep "Include seen questions" off.</li>
+      <li>Behind? Cut own bank, never RadWise or sleep.</li>
+      <li>Log every wrong or guessed question.</li>
+      <li>No new books.</li>
     </ul>
+
+    <section class="target" id="target" aria-label="Today's target">
+      <div class="thead">
+        <div class="tt1"><span class="tdate" id="tDate"></span><span class="ttitle" id="tTitle"></span></div>
+        <div class="tmeta"><span class="badge" id="tBadge"></span><span class="tdone" id="tTasks"></span><button type="button" class="addbtn" id="tAdd">+ Add task</button></div>
+      </div>
+      <div class="tg" id="tGroups"></div>
+    </section>
+  </main>
+
+  <div id="tabOld" class="tab" hidden>
+    <div class="overall">
+      <div class="row"><span id="ovl">0 of 0 tasks</span><span id="ovp">0%</span></div>
+      <div class="bar"><i id="ovb"></i></div>
+    </div>
+
+    <div class="rhythm">
+      <h2>Study rhythm</h2>
+      <ul>
+        <li>Morning, 3.5 to 4 h: RadWise in sets of 50, review each set straight after.</li>
+        <li>Afternoon, 3 h: theory books, active notes, not passive reading.</li>
+        <li>Evening, 1 to 1.5 h: 30 to 40 questions from your own bank, then the error log.</li>
+        <li>Sleep at least 7 h.</li>
+      </ul>
+    </div>
+
+    <div class="rules">
+      <h2>Rules</h2>
+      <ul>
+        <li>Keep "Include seen questions" off on RadWise so you only get unseen ones.</li>
+        <li>If you fall more than 40 questions behind, cut own-bank time. Never cut RadWise or sleep.</li>
+        <li>Error log: one line per wrong or guessed question, with the learning point.</li>
+        <li>No new books after Friday. Revise what you already have.</li>
+        <li>Nuclear medicine, breast and obstetrics: skim only, they carry very few exam marks.</li>
+      </ul>
+    </div>
+
+    <h2 class="sec">Previous days</h2>
+    <div id="list"></div>
+    <h2 class="sec">Upcoming days</h2>
+    <div id="listUp"></div>
+
+    <div class="foot"><button id="reset" type="button">Restore original plan</button><button id="reset2" type="button" hidden>Tap again: removes your changes</button></div>
   </div>
-
-  <div id="list" class="wrap" style="gap:12px"></div>
-
-  <div class="rules">
-    <h2>Rules</h2>
-    <ul>
-      <li>Keep "Include seen questions" off on RadWise so you only get unseen ones.</li>
-      <li>If you fall more than 40 questions behind, cut own-bank time. Never cut RadWise or sleep.</li>
-      <li>Error log: one line per wrong or guessed question, with the learning point.</li>
-      <li>No new books after Friday. Revise what you already have.</li>
-      <li>Nuclear medicine, breast and obstetrics: skim only, they carry very few exam marks.</li>
-    </ul>
-  </div>
-
-
-  <div class="foot"><button id="reset" type="button">Restore original plan</button><button id="reset2" type="button" hidden>Tap again: removes your changes</button></div>
 </div>
 
 <script>
@@ -227,7 +315,7 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(model));localStorage
 function saveSoon(){clearTimeout(st);st=setTimeout(save,300);}
 
 var todayStr=(function(){var n=new Date();return n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")+"-"+String(n.getDate()).padStart(2,"0")})();
-var list=document.getElementById("list");
+var list=document.getElementById("list"), listUp=document.getElementById("listUp");
 
 var rwCats=null;
 function qLeft(items){var l=0,has=false;items.forEach(function(i){if(i.sub&&i.n!=null){has=true;l+=Math.max(0,i.n-Math.min(i.a||0,i.n));}});return {l:l,has:has};}
@@ -244,6 +332,10 @@ function refreshCounts(){
       else{b.textContent=c[0]+"/"+c[1]; b.className="badge"+(c[1]&&c[0]===c[1]?" full":"");}
     }
   });
+  var TD=todayDay(), tAll=[]; model[TD.id].forEach(function(g){g.items.forEach(function(i){tAll.push(i)})});
+  var tq=qLeft(tAll), tc=counts(TD), tb=document.getElementById("tBadge");
+  if(tb){tb.textContent=tq.has?(tq.l?(tq.l+" questions left"):"Questions done"):"No question targets"; tb.className="badge"+(tq.has&&!tq.l?" full":"");}
+  var tt=document.getElementById("tTasks"); if(tt)tt.textContent=tc[0]+" of "+tc[1]+" tasks done";
   var ans=mAns, tot=mTot, rwLeft=null;
   if(rwCats){ans=0;tot=0;for(var k in rwCats){ans+=rwCats[k].a;tot+=rwCats[k].n;} rwLeft=tot-ans;}
   var p=tot?Math.round(ans/tot*100):0;
@@ -351,29 +443,10 @@ function attachDrag(handle,row,id){
   });
 }
 
-function render(){
-  var scrollY=window.scrollY;
-  list.innerHTML="";
-  D.forEach(function(d){
-    var isToday=d.date===todayStr;
-    if(!(d.id in openMap)){
-      openMap[d.id]=isToday||(todayStr<D[0].date&&d===D[0])||(todayStr>D[D.length-1].date&&d===D[D.length-1]);
-    }
-    var open=openMap[d.id];
-    var sec=document.createElement("section"); sec.className="day"+(isToday?" today":""); sec.id=d.id;
-    var btn=document.createElement("button"); btn.type="button"; btn.setAttribute("aria-expanded",open);
-    btn.innerHTML='<span class="date"><span class="dl"></span><small></small></span><span class="title"><span class="tt"></span><small class="ss"></small></span><span class="badge"></span>';
-    btn.querySelector(".dl").textContent=d.label;
-    btn.querySelector("small").textContent=d.dow;
-    var tt=btn.querySelector(".tt"); tt.textContent=d.title;
-    if(isToday){var tg=document.createElement("span"); tg.className="tag"; tg.textContent="today"; tt.appendChild(tg);}
-    btn.querySelector(".ss").textContent=d.sub;
-    var body=document.createElement("div"); body.className="body"; body.hidden=!open;
-    btn.addEventListener("click",function(){ openMap[d.id]=body.hidden; body.hidden=!body.hidden; btn.setAttribute("aria-expanded",!body.hidden); });
-
+function fillBody(d,body,today){
     model[d.id].forEach(function(g){
       if(!g.items.length)return;
-      var h=document.createElement("div"); h.className="grp"; var gq=qLeft(g.items); h.textContent=g.name+(gq.has?" \u00b7 "+gq.l+" left":""); body.appendChild(h);
+      var gw=document.createElement("div"); gw.className="gwrap"; body.appendChild(gw); var h=document.createElement("div"); h.className="grp"; var gq=qLeft(g.items); h.textContent=g.name+(gq.has?" \u00b7 "+gq.l+" left":""); gw.appendChild(h);
       g.items.forEach(function(it){
         var r=document.createElement("div"); r.className="item"+(it.done?" done":"");
         var ck=document.createElement("button"); ck.type="button"; ck.className="ck"; ck.setAttribute("role","checkbox");
@@ -417,10 +490,11 @@ function render(){
         if(it.from){var cp=document.createElement("span"); cp.className="carry"; cp.textContent="\u21aa Carried from "+it.from; mn.appendChild(cp);}
         var gr=document.createElement("button"); gr.type="button"; gr.className="grip"; gr.textContent="\u22ee\u22ee";
         gr.setAttribute("aria-label","Drag to move to another day"); gr.setAttribute("title","Drag to move");
-        r.dataset.id=it.id; attachDrag(gr,r,it.id);
-        r.appendChild(ck); r.appendChild(mn); r.appendChild(gr); body.appendChild(r);
+        r.dataset.id=it.id; r.appendChild(ck); r.appendChild(mn); if(!today){attachDrag(gr,r,it.id); r.appendChild(gr);} gw.appendChild(r);
       });
     });
+
+  if(today)return;
     if(d.note){var nt=document.createElement("div"); nt.className="note"; nt.textContent=d.note; body.appendChild(nt);}
     var nb=document.createElement("button"); nb.type="button"; nb.className="newrow"; nb.innerHTML='<span class="plus">+</span> New task';
     nb.addEventListener("click",function(){
@@ -430,8 +504,46 @@ function render(){
       addAfter(d,g,null,"");
     });
     body.appendChild(nb);
-    sec.appendChild(btn); sec.appendChild(body); list.appendChild(sec);
+}
+function todayDay(){
+  var t=todayNow();
+  for(var i=0;i<D.length;i++)if(D[i].date===t)return D[i];
+  return t<D[0].date?D[0]:D[D.length-1];
+}
+function addTaskTo(d){
+  var gs=model[d.id].filter(function(x){return x.items.length});
+  var g=gs.length?gs[gs.length-1]:null;
+  if(!g){g=model[d.id].filter(function(x){return x.name==="Added"})[0]; if(!g){g={name:"Added",items:[]};model[d.id].push(g);}}
+  addAfter(d,g,null,"");
+}
+function dayCard(d,TD){
+  var open=openMap[d.id]===true;
+  var sec=document.createElement("section"); sec.className="day"; sec.id=d.id;
+  var btn=document.createElement("button"); btn.type="button"; btn.setAttribute("aria-expanded",open);
+  btn.innerHTML='<span class="date"><span class="dl"></span><small></small></span><span class="title"><span class="tt"></span><small class="ss"></small></span><span class="badge"></span>';
+  btn.querySelector(".dl").textContent=d.label;
+  btn.querySelector("small").textContent=d.dow;
+  btn.querySelector(".tt").textContent=d.title;
+  btn.querySelector(".ss").textContent=d.sub;
+  var body=document.createElement("div"); body.className="body"; body.hidden=!open;
+  btn.addEventListener("click",function(){ openMap[d.id]=body.hidden; body.hidden=!body.hidden; btn.setAttribute("aria-expanded",!body.hidden); });
+  fillBody(d,body,false);
+  sec.appendChild(btn); sec.appendChild(body);
+  return sec;
+}
+function render(){
+  var scrollY=window.scrollY, TD=todayDay();
+  list.innerHTML=""; listUp.innerHTML="";
+  D.slice().reverse().forEach(function(d){
+    if(d===TD)return;
+    (d.date<TD.date?list:listUp).appendChild(dayCard(d,TD));
   });
+  // upcoming days read best in date order
+  var up=Array.prototype.slice.call(listUp.children).reverse(); listUp.innerHTML=""; up.forEach(function(e){listUp.appendChild(e);});
+  document.getElementById("tDate").textContent=TD.dow+" "+TD.label;
+  document.getElementById("tTitle").textContent=TD.title;
+  var tg=document.getElementById("tGroups"); tg.innerHTML=""; fillBody(TD,tg,true);
+  document.getElementById("tAdd").onclick=function(){addTaskTo(TD);};
   refreshCounts();
   window.scrollTo(0,scrollY);
   if(focusReq){var el=document.getElementById("t-"+focusReq.id); focusReq=null; if(el)placeEnd(el);}
@@ -568,6 +680,39 @@ var QUOTES=[{"en": "Every question you answer now is one less surprise on exam d
 })();
 refreshCounts();
 
+
+/* Tabs, full screen and keep-awake */
+(function(){
+  var app=document.getElementById("app"), tT=document.getElementById("tbT"), tO=document.getElementById("tbO"),
+      vT=document.getElementById("tabToday"), vO=document.getElementById("tabOld");
+  function show(which){
+    var today=which==="today";
+    vT.hidden=!today; vO.hidden=today;
+    tT.setAttribute("aria-selected",today); tO.setAttribute("aria-selected",!today);
+    app.classList.toggle("fit",today);
+    window.scrollTo(0,0);
+  }
+  tT.addEventListener("click",function(){show("today");});
+  tO.addEventListener("click",function(){show("old");});
+  show("today");
+  var fs=document.getElementById("fsBtn"), de=document.documentElement;
+  var can=de.requestFullscreen||de.webkitRequestFullscreen;
+  if(!can){fs.hidden=true;}
+  else{
+    fs.addEventListener("click",function(){
+      var on=document.fullscreenElement||document.webkitFullscreenElement;
+      try{
+        var r=on?(document.exitFullscreen||document.webkitExitFullscreen).call(document):(de.requestFullscreen||de.webkitRequestFullscreen).call(de);
+        if(r&&r.catch)r.catch(function(){});
+      }catch(e){}
+    });
+    var lab=function(){var on=document.fullscreenElement||document.webkitFullscreenElement;fs.querySelector("span").textContent=on?"Exit full screen":"Full screen";};
+    document.addEventListener("fullscreenchange",lab);document.addEventListener("webkitfullscreenchange",lab);
+  }
+  var wl=null;
+  function keepAwake(){try{if(navigator.wakeLock&&!document.hidden)navigator.wakeLock.request("screen").then(function(l){wl=l;}).catch(function(){});}catch(e){}}
+  keepAwake(); document.addEventListener("visibilitychange",function(){if(!document.hidden)keepAwake();});
+})();
 /* Pull to refresh (iPhone home-screen apps have none built in). */
 (function(){
   var el=document.createElement("div"); el.id="ptr"; el.setAttribute("aria-hidden","true"); document.body.appendChild(el);
